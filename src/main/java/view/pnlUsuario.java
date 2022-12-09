@@ -1,0 +1,281 @@
+package view;
+
+import java.util.Objects;
+import javax.persistence.EntityManagerFactory;
+import javax.swing.JOptionPane;
+import model.DAO.UsuarioDAO;
+import model.entity.Usuario;
+import utilities.Constants;
+
+/**
+ *
+ * @author Ignacio Pineda Martín
+ */
+public class pnlUsuario extends pnlAppSoftBank {
+    
+    private UsuarioDAO udao;
+    private Usuario usuario = new Usuario();
+
+    /**
+     * Creates new form pnlUsuario
+     */
+    public pnlUsuario() {
+        initComponents();
+    }
+    
+    public pnlUsuario(EntityManagerFactory emf) {
+        this();
+        this.jpaObject = usuario;
+        this.emf = emf;
+        // Creamos el DAO con su EntityManagerFactory.
+        udao = new UsuarioDAO(emf);
+        // Preparamos el panel en su estado inicial.
+        limpiarPanel();
+    }
+    
+    public void setJPAObject(Usuario jpaObject) {
+        this.usuario = jpaObject;
+        rellenarCampos();
+    }
+    
+    public Usuario getJPAObject() {
+        recogerCampos();
+        return this.usuario;
+    }
+    
+    @Override
+    public void sendJPAObjectToFrmParent() {
+        if (this.frmParent != null) {
+            frmParent.setJPAObject(this.usuario);            
+        }        
+    }
+    
+    /**
+     * Método para limpiar el panel al estado inicial. Necesario para ser
+     * invocado desde el botón "Limpiar" del formulario contenedor.
+     */
+    protected final void limpiarPanel() {
+        vaciarCampos();
+        inicializarFormulario();
+    }
+    
+    /**
+     * Método para inicializar los campos del formulario.
+     */
+    private void vaciarCampos() {
+        usuario.setIdUsuario(null);
+        txtCodUsuario.setText("");
+        txtPassword.setText("");
+    }
+    
+    /**
+     * Método para rellenar los campos del formulario con la propiedad
+     * {@link usuario}
+     */
+    private void rellenarCampos() {
+        txtCodUsuario.setText(usuario.getCodUsuario());
+        txtPassword.setText(usuario.getPassword());
+    }
+ 
+    /**
+     * Método para recoger los campos del formulario en la propiedad
+     * {@link usuario}
+     */    
+    private void recogerCampos() {
+        usuario.setCodUsuario(txtCodUsuario.getText());
+        usuario.setPassword(String.valueOf(txtPassword.getPassword()));
+    }
+
+    /**
+     * Método para preparar el formulario en un estado inicial.
+     */
+    protected void inicializarFormulario() {
+        txtCodUsuario.requestFocus();
+        // Llamada para intentar habilitar los botones CRUD.
+        if (this.frmParent != null) {
+            frmParent.tryEnableCRUDButtons();
+        }        
+    }
+    
+    @Override
+    protected boolean checkRequiredFields() {
+        return !txtCodUsuario.getText().equals("") &&
+               checkCodUsuario() &&
+               !(String.valueOf(txtPassword.getPassword()).equals(""));
+    }
+
+    /**
+     * Método para comprobar que el código de usuario introducido no está
+     * asignado a otro usuario.
+     * 
+     * @return <b>true</b> El código de usuario está libre.
+     * <br><b>false</b> El código de usuario NO está libre.
+     */
+    protected boolean checkCodUsuario() {
+        boolean resultado = true;
+        
+        // Comprobamos que el campo de código de usuario tenga valor.
+        if (!txtCodUsuario.getText().equals("")) {
+            // Comprobamos si el código de usuario ya existe en la BB.DD.
+            if (udao.buscarUsuario(txtCodUsuario.getText())) {
+                // Si el código de usuario existe, comprobamos que no sea el 
+                // que ya está asignado en el panel.
+                if (!Objects.equals(this.usuario.getIdUsuario(), udao.getUsuario().getIdUsuario())) {
+                    resultado = false;
+                }
+            }
+        }
+        return resultado;
+    }
+
+    /**
+     * Método para comprobar que el código de usuario introducido no está
+     * asignado a otro usuario, mostrando un panel de error si el usuario
+     * ya está asignado.
+     * 
+     * @return <b>true</b> El código de usuario está libre.
+     * <br><b>false</b> El código de usuario NO está libre.
+     */    
+    protected boolean checkCodUsuarioNoExiste() {
+        // Comprobamos si el usuario ya existe.
+        if (!checkCodUsuario() && (this.panelMode == Constants.PanelMode.CRUD)) {
+            String mensaje = String.format("El usuario %s ya existe. Elija otro usuario.",
+                    txtCodUsuario.getText());
+            if (this.frmParent != null) {
+                ((frmAppSoftBank) frmParent).setStatusBarText("ERROR - " + mensaje);
+            }
+            JOptionPane.showMessageDialog(this, mensaje, "Usuario", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        return true;        
+    }
+    
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        pnlDatos = new javax.swing.JPanel();
+        lblCodUsuario = new javax.swing.JLabel();
+        txtCodUsuario = new javax.swing.JTextField();
+        lblPassword = new javax.swing.JLabel();
+        txtPassword = new javax.swing.JPasswordField();
+
+        setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)), "Usuario", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 14))); // NOI18N
+
+        pnlDatos.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        pnlDatos.setName("pnlDatos"); // NOI18N
+
+        lblCodUsuario.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblCodUsuario.setText("Cód. usuario");
+
+        txtCodUsuario.setColumns(10);
+        txtCodUsuario.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtCodUsuario.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtCodUsuarioKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtCodUsuarioKeyTyped(evt);
+            }
+        });
+
+        lblPassword.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblPassword.setText("Contraseña");
+
+        txtPassword.setColumns(10);
+        txtPassword.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtPassword.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtPasswordKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtPasswordKeyTyped(evt);
+            }
+        });
+
+        javax.swing.GroupLayout pnlDatosLayout = new javax.swing.GroupLayout(pnlDatos);
+        pnlDatos.setLayout(pnlDatosLayout);
+        pnlDatosLayout.setHorizontalGroup(
+            pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlDatosLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(lblCodUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtCodUsuario))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblPassword)
+                    .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        pnlDatosLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtCodUsuario, txtPassword});
+
+        pnlDatosLayout.setVerticalGroup(
+            pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlDatosLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblCodUsuario)
+                    .addComponent(lblPassword))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtCodUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(pnlDatos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(pnlDatos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void txtPasswordKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPasswordKeyReleased
+        // Llamada para intentar habilitar los botones CRUD.
+        if (this.frmParent != null) {
+            frmParent.tryEnableCRUDButtons();
+        } 
+    }//GEN-LAST:event_txtPasswordKeyReleased
+
+    private void txtCodUsuarioKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCodUsuarioKeyReleased
+        checkCodUsuarioNoExiste();
+        // Llamada para intentar habilitar los botones CRUD.
+        if (this.frmParent != null) {
+            frmParent.tryEnableCRUDButtons();
+        }
+    }//GEN-LAST:event_txtCodUsuarioKeyReleased
+
+    private void txtCodUsuarioKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCodUsuarioKeyTyped
+        // Límite de 20 carácteres.
+        if (txtCodUsuario.getText().length() >= 20)
+            evt.consume();
+    }//GEN-LAST:event_txtCodUsuarioKeyTyped
+
+    private void txtPasswordKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPasswordKeyTyped
+        // Límite de 20 carácteres.
+        if (String.valueOf(txtPassword.getPassword()).length() >= 20)
+            evt.consume();
+    }//GEN-LAST:event_txtPasswordKeyTyped
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel lblCodUsuario;
+    private javax.swing.JLabel lblPassword;
+    private javax.swing.JPanel pnlDatos;
+    private javax.swing.JTextField txtCodUsuario;
+    private javax.swing.JPasswordField txtPassword;
+    // End of variables declaration//GEN-END:variables
+}
